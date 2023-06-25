@@ -3,8 +3,10 @@ import machine
 import ssd1306
 import random
 from time import sleep
+from time import time
 import os
 import framebuf
+import network
 
 # using default address 0x3C
 i2c = I2C(sda=Pin(4), scl=Pin(5))
@@ -15,6 +17,8 @@ p13 = Pin(13, Pin.IN, Pin.PULL_UP)
 
 die_size = [4,4,4,4,4,4]
 die_index = 0
+
+sleeptimer = 0
 
 def reshuf():
     bits = 3
@@ -93,6 +97,8 @@ def drawDie(position,value):
 
 def cycleDieSides(p):
     global die_size
+    global sleeptimer
+    sleeptimer = time()
     die_size[die_index] += 1
     if die_size[die_index] == 5: die_size[die_index] = 6
     if die_size[die_index] == 7: die_size[die_index] = 8
@@ -104,6 +110,8 @@ def cycleDieSides(p):
 
 def cycleDie(p):
     global die_index
+    global sleeptimer
+    sleeptimer = time()
     file = open("cfg.txt", "w")
     cfg = ','.join(str(x) for x in die_size)
     file.write(cfg)
@@ -115,7 +123,7 @@ def cycleDie(p):
 
 
 def printDado(die_size,side,x,y):
-    print("test image")
+    print("display image")
     img = "d"
     img += str(die_size)
     img += "l"
@@ -153,6 +161,13 @@ die_index = 0
 
 reshuf()
 
+sleeptimer = time()
+
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(False)
+ap_if = network.WLAN(network.AP_IF)
+ap_if.active(False)
+
 while True:
     #print("running")
     if p12.value() == 0:
@@ -163,3 +178,6 @@ while True:
         cycleDieSides(0)
         print("cycleDieSides")
         sleep(0.1)
+    
+    if (time() - sleeptimer) > 30:
+        gotobed(0)
