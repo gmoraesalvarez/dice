@@ -130,9 +130,7 @@ def printDado(die_size,side,x,y):
     img += str(side)
     img += ".pbm"
     with open(img,'rb') as f:
-        f.readline()       # Image format
-        f.readline()       # explanatory note
-        f.readline()       # Image size
+        f.read(83) # header data
         data = bytearray(f.read())
     fbuf = framebuf.FrameBuffer(data, 41, 31, framebuf.MONO_HLSB)
     #display.invert(1)
